@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wealth Wheel Challenge</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-purple-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-chart-line text-green-500"></i>
+                Wealth Wheel Challenge
+            </h1>
+            <p class="text-lg text-gray-600">Learn investing basics with $1,000!</p>
+        </div>
+
+        <!-- Game Container -->
+        <div id="gameContainer" class="max-w-6xl mx-auto">
+            
+            <!-- Welcome Screen -->
+            <div id="welcomeScreen" class="bg-white rounded-lg shadow-lg p-8 mb-6">
+                <h2 class="text-2xl font-bold mb-4 text-center">Welcome to Your Investment Journey! 🚀</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3">How to Play:</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li><i class="fas fa-dollar-sign text-green-500"></i> Start with $1,000</li>
+                            <li><i class="fas fa-chart-pie text-blue-500"></i> Choose from 5 different assets</li>
+                            <li><i class="fas fa-calendar text-purple-500"></i> Experience 30 turns of market events</li>
+                            <li><i class="fas fa-trophy text-yellow-500"></i> Learn about risk vs reward</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-3">Asset Types:</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center"><i class="fas fa-piggy-bank text-green-400 w-6"></i> Bank Savings (Safe, Low Return)</div>
+                            <div class="flex items-center"><i class="fas fa-chart-line text-blue-400 w-6"></i> Stocks (Medium Risk, Medium Return)</div>
+                            <div class="flex items-center"><i class="fas fa-certificate text-yellow-400 w-6"></i> Bonds (Low Risk, Stable Return)</div>
+                            <div class="flex items-center"><i class="fas fa-home text-red-400 w-6"></i> Real Estate (Medium Risk, Long-term)</div>
+                            <div class="flex items-center"><i class="fas fa-coins text-purple-400 w-6"></i> Crypto (High Risk, High Return)</div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="startGame()" class="w-full mt-6 bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-6 rounded-lg hover:from-green-600 hover:to-blue-600 font-semibold">
+                    Start Playing! 🎮
+                </button>
+            </div>
+
+            <!-- Strategy Selection -->
+            <div id="strategyScreen" class="bg-white rounded-lg shadow-lg p-6 mb-6 hidden">
+                <h2 class="text-2xl font-bold mb-4 text-center">Choose Your Investment Strategy</h2>
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <div class="strategy-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors" onclick="selectStrategy('conservative')">
+                        <h3 class="font-bold text-lg mb-2">🛡️ Conservative</h3>
+                        <p class="text-sm text-gray-600 mb-3">Play it safe with stable investments</p>
+                        <div class="text-xs space-y-1">
+                            <div>Bank: 40% | Stocks: 10%</div>
+                            <div>Bonds: 30% | Real Estate: 15%</div>
+                            <div>Crypto: 5%</div>
+                        </div>
+                    </div>
+                    <div class="strategy-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors" onclick="selectStrategy('balanced')">
+                        <h3 class="font-bold text-lg mb-2">⚖️ Balanced</h3>
+                        <p class="text-sm text-gray-600 mb-3">Mix of safety and growth potential</p>
+                        <div class="text-xs space-y-1">
+                            <div>Bank: 20% | Stocks: 30%</div>
+                            <div>Bonds: 20% | Real Estate: 20%</div>
+                            <div>Crypto: 10%</div>
+                        </div>
+                    </div>
+                    <div class="strategy-card border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors" onclick="selectStrategy('aggressive')">
+                        <h3 class="font-bold text-lg mb-2">🚀 Aggressive</h3>
+                        <p class="text-sm text-gray-600 mb-3">High risk, high reward approach</p>
+                        <div class="text-xs space-y-1">
+                            <div>Bank: 5% | Stocks: 40%</div>
+                            <div>Bonds: 5% | Real Estate: 15%</div>
+                            <div>Crypto: 35%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button onclick="showCustomAllocation()" class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">
+                        Custom Allocation
+                    </button>
+                </div>
+            </div>
+
+            <!-- Custom Allocation -->
+            <div id="customScreen" class="bg-white rounded-lg shadow-lg p-6 mb-6 hidden">
+                <h2 class="text-2xl font-bold mb-4 text-center">Custom Portfolio Allocation</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">🏦 Bank Savings ($)</label>
+                            <input type="number" id="bankInput" class="w-full border rounded px-3 py-2" min="0" max="1000" value="200" onchange="updateAllocation()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">📈 Stocks ($)</label>
+                            <input type="number" id="stocksInput" class="w-full border rounded px-3 py-2" min="0" max="1000" value="300" onchange="updateAllocation()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">📜 Bonds ($)</label>
+                            <input type="number" id="bondsInput" class="w-full border rounded px-3 py-2" min="0" max="1000" value="200" onchange="updateAllocation()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">🏠 Real Estate ($)</label>
+                            <input type="number" id="realEstateInput" class="w-full border rounded px-3 py-2" min="0" max="1000" value="200" onchange="updateAllocation()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">💰 Crypto ($)</label>
+                            <input type="number" id="cryptoInput" class="w-full border rounded px-3 py-2" min="0" max="1000" value="100" onchange="updateAllocation()">
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded">
+                        <h3 class="font-bold mb-2">Allocation Summary</h3>
+                        <div id="allocationSummary" class="space-y-1 text-sm"></div>
+                        <div class="mt-4 font-bold" id="totalAmount">Total: $1000</div>
+                        <button onclick="confirmCustomAllocation()" id="confirmButton" class="w-full mt-4 bg-green-500 text-white py-2 rounded hover:bg-green-600">
+                            Confirm Allocation
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Screen -->
+            <div id="gameScreen" class="hidden">
+                <!-- Portfolio Dashboard -->
+                <div class="grid md:grid-cols-3 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">📊 Portfolio Status</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span>Turn:</span>
+                                <span id="currentTurn" class="font-bold">0/30</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total Value:</span>
+                                <span id="totalValue" class="font-bold text-green-600">$1,000</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Profit/Loss:</span>
+                                <span id="profitLoss" class="font-bold">$0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Return:</span>
+                                <span id="returnRate" class="font-bold">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">💼 Current Holdings</h3>
+                        <div id="holdingsDisplay" class="space-y-2 text-sm"></div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">📰 Market News</h3>
+                        <div id="newsDisplay" class="text-sm text-gray-700">
+                            Ready to start your investment journey!
+                        </div>
+                        <button onclick="nextTurn()" id="nextTurnBtn" class="w-full mt-4 bg-blue-500 text-white py-2 rounded hover:bg-blue-600">
+                            Next Turn
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">📈 Portfolio Value Over Time</h3>
+                        <canvas id="valueChart" style="height: 300px;"></canvas>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h3 class="text-xl font-bold mb-4">🥧 Asset Allocation</h3>
+                        <canvas id="pieChart" style="height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- End Game Screen -->
+            <div id="endScreen" class="bg-white rounded-lg shadow-lg p-8 mb-6 hidden">
+                <h2 class="text-3xl font-bold mb-4 text-center">🎉 Game Complete!</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-xl font-bold mb-3">Your Results:</h3>
+                        <div id="finalResults" class="space-y-2"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold mb-3">💡 Investment Lessons:</h3>
+                        <div id="lessons" class="space-y-2 text-sm"></div>
+                    </div>
+                </div>
+                <div class="text-center mt-6">
+                    <button onclick="resetGame()" class="bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 font-semibold">
+                        Play Again! 🔄
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            turn: 0,
+            portfolio: {
+                'Bank Savings': 0,
+                'Stocks': 0,
+                'Bonds': 0,
+                'Real Estate': 0,
+                'Crypto': 0
+            },
+            history: [],
+            events: []
+        };
+
+        // Economic Events
+        const economicEvents = [
+            {description: "Economic boom! People are buying more, boosting the stock market!", changes: {'Bank Savings': 0, 'Stocks': 20, 'Bonds': -2, 'Real Estate': 5, 'Crypto': 10}},
+            {description: "Interest rates dropped, making borrowing easier and investments attractive!", changes: {'Bank Savings': -1, 'Stocks': 10, 'Bonds': -5, 'Real Estate': 8, 'Crypto': 15}},
+            {description: "Interest rates rose, boosting savings but hurting riskier investments.", changes: {'Bank Savings': 2, 'Stocks': -10, 'Bonds': 5, 'Real Estate': -5, 'Crypto': -12}},
+            {description: "Inflation spike! Prices are rising, affecting different assets differently.", changes: {'Bank Savings': -3, 'Stocks': 5, 'Bonds': -4, 'Real Estate': 10, 'Crypto': 20}},
+            {description: "Economic recession hits, people are spending less and saving more.", changes: {'Bank Savings': 1, 'Stocks': -15, 'Bonds': 3, 'Real Estate': -8, 'Crypto': -25}},
+            {description: "Tech boom! New technologies are driving innovation and crypto adoption.", changes: {'Bank Savings': 0, 'Stocks': 15, 'Bonds': -1, 'Real Estate': 2, 'Crypto': 30}},
+            {description: "Oil prices spiked, increasing energy costs across the economy.", changes: {'Bank Savings': -1, 'Stocks': -5, 'Bonds': -2, 'Real Estate': -3, 'Crypto': 5}},
+            {description: "Government tax cuts encourage more investment and spending.", changes: {'Bank Savings': 0, 'Stocks': 8, 'Bonds': 2, 'Real Estate': 6, 'Crypto': 10}},
+            {description: "Natural disaster damages properties and disrupts markets.", changes: {'Bank Savings': 0, 'Stocks': -3, 'Bonds': 1, 'Real Estate': -15, 'Crypto': -5}},
+            {description: "Cryptocurrency craze! Digital currencies gain mainstream attention.", changes: {'Bank Savings': -1, 'Stocks': 3, 'Bonds': -1, 'Real Estate': 2, 'Crypto': 40}},
+            {description: "New crypto regulations cause uncertainty in digital markets.", changes: {'Bank Savings': 1, 'Stocks': -2, 'Bonds': 2, 'Real Estate': 0, 'Crypto': -30}},
+            {description: "Stock market crash! Panic selling hits equity markets hard.", changes: {'Bank Savings': 2, 'Stocks': -25, 'Bonds': 5, 'Real Estate': -10, 'Crypto': -20}},
+            {description: "Real estate boom! Housing prices are soaring nationwide.", changes: {'Bank Savings': -1, 'Stocks': 2, 'Bonds': -3, 'Real Estate': 15, 'Crypto': 5}},
+            {description: "Bond market stability attracts conservative investors.", changes: {'Bank Savings': 1, 'Stocks': -2, 'Bonds': 8, 'Real Estate': 0, 'Crypto': -3}},
+            {description: "Global conflict creates market uncertainty and volatility.", changes: {'Bank Savings': 3, 'Stocks': -10, 'Bonds': 4, 'Real Estate': -5, 'Crypto': -15}},
+            {description: "Economic recovery begins, boosting investor confidence.", changes: {'Bank Savings': 0, 'Stocks': 12, 'Bonds': -2, 'Real Estate': 7, 'Crypto': 10}},
+            {description: "Tech bubble bursts, affecting growth stocks and crypto.", changes: {'Bank Savings': 1, 'Stocks': -20, 'Bonds': 3, 'Real Estate': 0, 'Crypto': -25}},
+            {description: "Banks raise savings rates, making deposits more attractive.", changes: {'Bank Savings': 4, 'Stocks': -3, 'Bonds': 2, 'Real Estate': -2, 'Crypto': -5}},
+            {description: "Inflation stabilizes, bringing calm to financial markets.", changes: {'Bank Savings': 1, 'Stocks': 2, 'Bonds': 3, 'Real Estate': 4, 'Crypto': 5}},
+            {description: "New cryptocurrency launch sparks digital asset interest.", changes: {'Bank Savings': 0, 'Stocks': 1, 'Bonds': 0, 'Real Estate': 1, 'Crypto': 25}},
+            {description: "Property tax increases reduce real estate attractiveness.", changes: {'Bank Savings': 0, 'Stocks': 0, 'Bonds': 1, 'Real Estate': -10, 'Crypto': 2}},
+            {description: "Corporate profits rise, leading to higher dividend payments.", changes: {'Bank Savings': 0, 'Stocks': 10, 'Bonds': 0, 'Real Estate': 3, 'Crypto': 5}},
+            {description: "Bond default risk emerges, causing fixed-income concerns.", changes: {'Bank Savings': 2, 'Stocks': -5, 'Bonds': -15, 'Real Estate': -2, 'Crypto': -10}},
+            {description: "Government housing support policies boost real estate.", changes: {'Bank Savings': -1, 'Stocks': 3, 'Bonds': -1, 'Real Estate': 12, 'Crypto': 3}},
+            {description: "Major cryptocurrency exchange hack shakes digital markets.", changes: {'Bank Savings': 1, 'Stocks': 0, 'Bonds': 1, 'Real Estate': 0, 'Crypto': -35}},
+            {description: "International trade agreements boost global markets.", changes: {'Bank Savings': 0, 'Stocks': 8, 'Bonds': 1, 'Real Estate': 4, 'Crypto': 10}},
+            {description: "Central bank cuts rates, reducing savings appeal.", changes: {'Bank Savings': -2, 'Stocks': 5, 'Bonds': -3, 'Real Estate': 3, 'Crypto': 8}},
+            {description: "Health crisis disrupts global markets and supply chains.", changes: {'Bank Savings': 2, 'Stocks': -12, 'Bonds': 4, 'Real Estate': -7, 'Crypto': -18}},
+            {description: "Green energy boom drives sustainable investment growth.", changes: {'Bank Savings': 0, 'Stocks': 4, 'Bonds': 0, 'Real Estate': 2, 'Crypto': 20}},
+            {description: "Currency fluctuations affect international investments.", changes: {'Bank Savings': -1, 'Stocks': -4, 'Bonds': -2, 'Real Estate': -3, 'Crypto': 15}}
+        ];
+
+        let valueChart, pieChart;
+
+        // Initialize Charts
+        function initCharts() {
+            // Value Chart
+            const valueCtx = document.getElementById('valueChart').getContext('2d');
+            valueChart = new Chart(valueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Start'],
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: [1000],
+                        borderColor: 'rgb(59, 130, 246)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Pie Chart
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Bank Savings', 'Stocks', 'Bonds', 'Real Estate', 'Crypto'],
+                    datasets: [{
+                        data: [200, 300, 200, 200, 100],
+                        backgroundColor: [
+                            '#10B981',
+                            '#3B82F6', 
+                            '#F59E0B',
+                            '#EF4444',
+                            '#8B5CF6'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        function startGame() {
+            document.getElementById('welcomeScreen').classList.add('hidden');
+            document.getElementById('strategyScreen').classList.remove('hidden');
+        }
+
+        function selectStrategy(strategy) {
+            const strategies = {
+                conservative: {'Bank Savings': 400, 'Stocks': 100, 'Bonds': 300, 'Real Estate': 150, 'Crypto': 50},
+                balanced: {'Bank Savings': 200, 'Stocks': 300, 'Bonds': 200, 'Real Estate': 200, 'Crypto': 100},
+                aggressive: {'Bank Savings': 50, 'Stocks': 400, 'Bonds': 50, 'Real Estate': 150, 'Crypto': 350}
+            };
+            
+            gameState.portfolio = strategies[strategy];
+            startMainGame();
+        }
+
+        function showCustomAllocation() {
+            document.getElementById('strategyScreen').classList.add('hidden');
+            document.getElementById('customScreen').classList.remove('hidden');
+            updateAllocation();
+        }
+
+        function updateAllocation() {
+            const bank = parseInt(document.getElementById('bankInput').value) || 0;
+            const stocks = parseInt(document.getElementById('stocksInput').value) || 0;
+            const bonds = parseInt(document.getElementById('bondsInput').value) || 0;
+            const realEstate = parseInt(document.getElementById('realEstateInput').value) || 0;
+            const crypto = parseInt(document.getElementById('cryptoInput').value) || 0;
+            
+            const total = bank + stocks + bonds + realEstate + crypto;
+            
+            document.getElementById('allocationSummary').innerHTML = `
+                <div>Bank Savings: $${bank} (${((bank/1000)*100).toFixed(1)}%)</div>
+                <div>Stocks: $${stocks} (${((stocks/1000)*100).toFixed(1)}%)</div>
+                <div>Bonds: $${bonds} (${((bonds/1000)*100).toFixed(1)}%)</div>
+                <div>Real Estate: $${realEstate} (${((realEstate/1000)*100).toFixed(1)}%)</div>
+                <div>Crypto: $${crypto} (${((crypto/1000)*100).toFixed(1)}%)</div>
+            `;
+            
+            document.getElementById('totalAmount').innerHTML = `Total: $${total}`;
+            document.getElementById('totalAmount').className = total === 1000 ? 'mt-4 font-bold text-green-600' : 'mt-4 font-bold text-red-600';
+            
+            document.getElementById('confirmButton').disabled = total !== 1000;
+            document.getElementById('confirmButton').className = total === 1000 ? 
+                'w-full mt-4 bg-green-500 text-white py-2 rounded hover:bg-green-600' :
+                'w-full mt-4 bg-gray-400 text-white py-2 rounded cursor-not-allowed';
+        }
+
+        function confirmCustomAllocation() {
+            gameState.portfolio = {
+                'Bank Savings': parseInt(document.getElementById('bankInput').value),
+                'Stocks': parseInt(document.getElementById('stocksInput').value),
+                'Bonds': parseInt(document.getElementById('bondsInput').value),
+                'Real Estate': parseInt(document.getElementById('realEstateInput').value),
+                'Crypto': parseInt(document.getElementById('cryptoInput').value)
+            };
+            startMainGame();
+        }
+
+        function startMainGame() {
+            document.getElementById('strategyScreen').classList.add('hidden');
+            document.getElementById('customScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            
+            gameState.turn = 0;
+            gameState.history = [JSON.parse(JSON.stringify(gameState.portfolio))];
+            
+            updateDisplay();
+            initCharts();
+        }
+
+        function updateDisplay() {
+            const totalValue = Object.values(gameState.portfolio).reduce((sum, value) => sum + value, 0);
+            const profitLoss = totalValue - 1000;
+            const returnRate = ((profitLoss / 1000) * 100).toFixed(1);
+            
+            document.getElementById('currentTurn').textContent = `${gameState.turn}/30`;
+            document.getElementById('totalValue').textContent = `$${totalValue.toFixed(2)}`;
+            document.getElementById('profitLoss').textContent = `$${profitLoss.toFixed(2)}`;
+            document.getElementById('profitLoss').className = profitLoss >= 0 ? 'font-bold text-green-600' : 'font-bold text-red-600';
+            document.getElementById('returnRate').textContent = `${returnRate}%`;
+            document.getElementById('returnRate').className = profitLoss >= 0 ? 'font-bold text-green-600' : 'font-bold text-red-600';
+            
+            // Update holdings
+            const holdingsHtml = Object.entries(gameState.portfolio).map(([asset, value]) => {
+                const percentage = ((value / totalValue) * 100).toFixed(1);
+                return `<div class="flex justify-between"><span>${asset}:</span><span>$${value.toFixed(2)} (${percentage}%)</span></div>`;
+            }).join('');
+            document.getElementById('holdingsDisplay').innerHTML = holdingsHtml;
+            
+            // Update charts
+            if (valueChart && pieChart) {
+                // Update value chart
+                valueChart.data.labels.push(`Turn ${gameState.turn}`);
+                valueChart.data.datasets[0].data.push(totalValue);
+                valueChart.update();
+                
+                // Update pie chart
+                pieChart.data.datasets[0].data = Object.values(gameState.portfolio);
+                pieChart.update();
+            }
+        }
+
+        function nextTurn() {
+            if (gameState.turn >= 30) {
+                endGame();
+                return;
+            }
+            
+            gameState.turn++;
+            
+            // Get random event
+            const event = economicEvents[Math.floor(Math.random() * economicEvents.length)];
+            gameState.events.push(event);
+            
+            // Apply changes
+            Object.keys(gameState.portfolio).forEach(asset => {
+                const change = event.changes[asset] / 100;
+                gameState.portfolio[asset] *= (1 + change);
+            });
+            
+            // Update display
+            document.getElementById('newsDisplay').innerHTML = `
+                <strong>Turn ${gameState.turn}:</strong><br>
+                ${event.description}<br><br>
+                <div class="text-xs mt-2">
+                    ${Object.entries(event.changes).map(([asset, change]) => 
+                        `<div class="flex justify-between">
+                            <span>${asset}:</span>
+                            <span class="${change >= 0 ? 'text-green-600' : 'text-red-600'}">${change >= 0 ? '+' : ''}${change}%</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            `;
+            
+            updateDisplay();
+            
+            if (gameState.turn >= 30) {
+                document.getElementById('nextTurnBtn').textContent = 'View Results';
+            }
+        }
+
+        function endGame() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('endScreen').classList.remove('hidden');
+            
+            const totalValue = Object.values(gameState.portfolio).reduce((sum, value) => sum + value, 0);
+            const profitLoss = totalValue - 1000;
+            const returnRate = ((profitLoss / 1000) * 100).toFixed(1);
+            
+            // Show results
+            document.getElementById('finalResults').innerHTML = `
+                <div class="text-lg"><strong>Starting Value:</strong> $1,000.00</div>
+                <div class="text-lg"><strong>Final Value:</strong> $${totalValue.toFixed(2)}</div>
+                <div class="text-lg ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}">
+                    <strong>Profit/Loss:</strong> $${profitLoss.toFixed(2)}
+                </div>
+                <div class="text-lg ${profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}">
+                    <strong>Return Rate:</strong> ${returnRate}%
+                </div>
+            `;
+            
+            // Show lessons based on performance
+            let lessons = [];
+            if (parseFloat(returnRate) > 30) {
+                lessons.push("🏆 Excellent! You took smart risks and diversified well.");
+                lessons.push("💡 High returns often come with high risks - you managed them well!");
+            } else if (parseFloat(returnRate) > 10) {
+                lessons.push("👍 Good job! You achieved solid returns with moderate risk.");
+                lessons.push("📈 Consistent growth is often better than trying to get rich quick.");
+            } else if (parseFloat(returnRate) > 0) {
+                lessons.push("😊 You made money! Conservative investing paid off.");
+                lessons.push("🛡️ Sometimes playing it safe is the smart choice.");
+            } else {
+                lessons.push("📚 Don't worry! Even losses are learning experiences.");
+                lessons.push("🎯 Try diversifying more next time to reduce risk.");
+            }
+            
+            lessons.push("💰 Diversification helps reduce risk in your portfolio.");
+            lessons.push("⏰ Time in the market is often better than timing the market.");
+            lessons.push("🎓 The more you learn about investing, the better your decisions become.");
+            
+            document.getElementById('lessons').innerHTML = lessons.map(lesson => `<div>${lesson}</div>`).join('');
+        }
+
+        function resetGame() {
+            // Reset game state
+            gameState = {
+                turn: 0,
+                portfolio: {
+                    'Bank Savings': 0,
+                    'Stocks': 0,
+                    'Bonds': 0,
+                    'Real Estate': 0,
+                    'Crypto': 0
+                },
+                history: [],
+                events: []
+            };
+            
+            // Reset displays
+            document.getElementById('endScreen').classList.add('hidden');
+            document.getElementById('welcomeScreen').classList.remove('hidden');
+            
+            // Reset input values
+            document.getElementById('bankInput').value = 200;
+            document.getElementById('stocksInput').value = 300;
+            document.getElementById('bondsInput').value = 200;
+            document.getElementById('realEstateInput').value = 200;
+            document.getElementById('cryptoInput').value = 100;
+            
+            // Destroy old charts
+            if (valueChart) {
+                valueChart.destroy();
+                valueChart = null;
+            }
+            if (pieChart) {
+                pieChart.destroy();
+                pieChart = null;
+            }
+        }
+
+        // Add hover effects for strategy cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const strategyCards = document.querySelectorAll('.strategy-card');
+            strategyCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.classList.add('bg-blue-50');
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.classList.remove('bg-blue-50');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
